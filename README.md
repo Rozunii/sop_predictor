@@ -9,11 +9,11 @@
 
 Sistema de predicción basado en Gradient Boosting para identificar probabilidad de Síndrome de Ovario Poliquístico (PCOS) a partir de variables clínicas, hormonales y de estilo de vida.
 
-📊 **[Ver Demo en Vivo](#)** | 📖 **[Documentación Completa](#estructura-del-proyecto)** | 🎓 **[Paper/Presentación](#referencias)**
+**[Ver Demo en Vivo](#)** | 📖 **[Documentación Completa](#estructura-del-proyecto)** | 🎓 **[Paper/Presentación](#referencias)**
 
 ---
 
-## 📑 Tabla de Contenidos
+## Tabla de Contenidos
 
 - [Características](#-características)
 - [Resultados](#-resultados)
@@ -28,27 +28,27 @@ Sistema de predicción basado en Gradient Boosting para identificar probabilidad
 
 ---
 
-## ✨ Características
+## Características
 
-### 🎯 Modelo Predictivo
+### Modelo Predictivo
 - **89.81% de accuracy** en predicción de SOP
 - **AUC-ROC de 0.9542** (poder discriminativo excelente)
 - Gradient Boosting optimizado con 18 variables clínicas
 - Validación cruzada de 5 folds
 
-### 📊 Análisis Estadístico Completo
+### Análisis Estadístico Completo
 - Análisis exploratorio de 541 pacientes
 - Pruebas inferenciales (Mann-Whitney, Chi-cuadrado)
 - Identificación de variables discriminantes
 - Análisis de correlaciones (Spearman)
 
-### 🌐 Aplicación Web Interactiva
+### Aplicación Web Interactiva
 - Interfaz intuitiva desarrollada en Streamlit
 - 3 páginas: Predicción, Referencias Médicas, Info del Proyecto
 - 10+ referencias científicas con DOI verificado
 - Visualizaciones interactivas con Plotly
 
-### 📚 Rigor Científico
+### Rigor Científico
 - Referencias basadas en criterios de Rotterdam
 - Guías internacionales 2023 sobre SOP
 - Valores normales validados por literatura médica
@@ -56,7 +56,7 @@ Sistema de predicción basado en Gradient Boosting para identificar probabilidad
 
 ---
 
-## 🏆 Resultados
+## Resultados
 
 ### Comparación de Modelos
 
@@ -77,14 +77,14 @@ Sistema de predicción basado en Gradient Boosting para identificar probabilidad
 
 ### Hallazgos Clínicos
 
-- ✅ **15 de 27 variables continuas** son estadísticamente significativas (p < 0.05)
-- ✅ **6 de 7 síntomas** altamente significativos para diagnóstico
-- ✅ **AMH** confirmado como biomarcador clave (p = 6.00e-08)
-- ✅ Variables ecográficas tienen el mayor poder discriminativo
+- **15 de 27 variables continuas** son estadísticamente significativas (p < 0.05)
+- **6 de 7 síntomas** altamente significativos para diagnóstico
+- **AMH** confirmado como biomarcador clave (p = 6.00e-08)
+- Variables ecográficas tienen el mayor poder discriminativo
 
 ---
 
-## 🛠️ Tecnologías
+## Tecnologías
 
 ### Backend & Machine Learning
 - Python 3.8+
@@ -103,7 +103,7 @@ Sistema de predicción basado en Gradient Boosting para identificar probabilidad
 
 ---
 
-## 🚀 Instalación Rápida
+## Instalación Rápida
 
 ### 1. Clonar el repositorio
 
@@ -140,7 +140,7 @@ La aplicación se abrirá en: `http://localhost:8501`
 
 ---
 
-## 💻 Uso
+## Uso
 
 ### Aplicación Web
 
@@ -191,7 +191,7 @@ print(f"Probabilidad de SOP: {probabilidad:.1%}")
 
 ---
 
-## 📁 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 predictor-sop/
@@ -229,7 +229,7 @@ predictor-sop/
 
 ---
 
-## 🔬 Metodología
+## Metodología
 
 ### 1. Análisis Exploratorio
 - Verificación de datos (541 pacientes, 42 variables)
@@ -267,14 +267,14 @@ predictor-sop/
 
 ---
 
-## 👥 Equipo
+## Equipo
 
 **Los Poliquísticos** - Proyecto de Probabilidad y Estadística II
 
-- [Bernardo Alejandro Partidas Díaz](https://github.com/usuario1) - Reporte ejecutivo
-- [Oscar Josue López González](https://github.com/usuario2) - Validación de modelos
-- [Rodrigo Alonso Castillo Ramírez](https://github.com/usuario3) - Visualizaciones
-- [Sebastian Sánchez Espinosa](https://github.com/usuario4) - Análisis de correlaciones
+- [Bernardo Alejandro Partidas Díaz]
+- [Oscar Josue López González]
+- [Rodrigo Alonso Castillo Ramírez]
+- [Sebastian Sánchez Espinosa]
 
 **Institución**: Centro Universitario de Guadalajara (CUGDL) - Universidad de Guadalajara  
 **Asignatura**: Probabilidad y Estadística II  
@@ -283,7 +283,7 @@ predictor-sop/
 
 ---
 
-## 📚 Referencias
+## Referencias
 
 ### Literatura Científica Principal
 
@@ -297,41 +297,22 @@ Ver lista completa en: [docs/REFERENCIAS_MEDICAS.md](docs/REFERENCIAS_MEDICAS.md
 
 ### Dataset
 
-- **Fuente**: [Kaggle - PCOS Dataset](https://www.kaggle.com/prasoonkottarathil/polycystic-ovary-syndrome-pcos) (o tu fuente)
 - **Tamaño**: 541 pacientes
 - **Variables**: 42 (18 usadas para predicción)
 - **Criterio diagnóstico**: Rotterdam 2003
 
 ---
 
-## ⚠️ Disclaimer
+## Disclaimer
 
 **IMPORTANTE**: Esta herramienta fue desarrollada con fines **educativos** como parte de un proyecto académico. 
 
-❌ **NO debe utilizarse como herramienta de diagnóstico médico**  
-✅ El diagnóstico de SOP debe realizarse por un profesional de la salud calificado
+**NO debe utilizarse como herramienta de diagnóstico médico**  
+El diagnóstico de SOP debe realizarse por un profesional de la salud calificado
 
 El modelo predictivo se basa en datos históricos y debe ser validado clínicamente antes de cualquier uso en contexto médico real.
 
----
-
-## 📜 Licencia
-
-Este proyecto está licenciado bajo la Licencia MIT - ver el archivo [LICENSE](LICENSE) para más detalles.
-
-```
-MIT License
-
-Copyright (c) 2024 Los Poliquísticos - CUGDL UDG
-
-Permission is hereby granted, free of charge, to any person obtaining a copy
-of this software and associated documentation files (the "Software"), to deal
-in the Software without restriction...
-```
-
----
-
-## 🤝 Contribuciones
+## Contribuciones
 
 Las contribuciones son bienvenidas. Para cambios importantes:
 
@@ -343,25 +324,12 @@ Las contribuciones son bienvenidas. Para cambios importantes:
 
 ---
 
-## 📞 Contacto
-
-**Equipo Los Poliquísticos**  
-📧 Email: [email del equipo]  
-🏫 Centro Universitario de Guadalajara (CUGDL) - UDG
-
-**Enlaces del Proyecto:**
-- 🔗 Repositorio: [https://github.com/TU_USUARIO/predictor-sop](https://github.com/TU_USUARIO/predictor-sop)
-- 📊 Demo: [Link a Streamlit Cloud o Hugging Face]
-- 📝 Documentación: [Link a docs]
-
----
-
-## 🌟 Agradecimientos
+## Agradecimientos
 
 - Dra. Claudia Fabiola por la asesoría en el proyecto
 - Centro Universitario de Guadalajara (CUGDL) - UDG
 - Comunidad de código abierto (scikit-learn, Streamlit, etc.)
-- Dataset original de [mencionar fuente]
+- Dataset original de Carlos Alberto Fregoso Iturria
 
 ---
 
