@@ -1,4 +1,4 @@
-# 🏥 Predictor de Síndrome de Ovario Poliquístico (SOP)
+# Predictor de Síndrome de Ovario Poliquístico (SOP)
 
 [![Python](https://img.shields.io/badge/Python-3.8+-blue.svg)](https://www.python.org/)
 [![Streamlit](https://img.shields.io/badge/Streamlit-1.28+-red.svg)](https://streamlit.io/)
@@ -9,7 +9,7 @@
 
 Sistema de predicción basado en Gradient Boosting para identificar probabilidad de Síndrome de Ovario Poliquístico (PCOS) a partir de variables clínicas, hormonales y de estilo de vida.
 
-**[Ver Demo en Vivo](#)** | 📖 **[Documentación Completa](#estructura-del-proyecto)** | 🎓 **[Paper/Presentación](#referencias)**
+**[Documentación Completa](#estructura-del-proyecto)** | **[Paper/Presentación](#referencias)**
 
 ---
 
