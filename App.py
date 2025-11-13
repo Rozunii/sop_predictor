@@ -52,9 +52,9 @@ st.markdown("""
 @st.cache_resource
 def load_model():
     try:
-        modelo = joblib.load('C:/Codigos/Challenge/modelos_pcos/modelo_gb_pcos.pkl')
-        scaler = joblib.load('C:/Codigos/Challenge/modelos_pcos/scaler_pcos.pkl')
-        model_info = joblib.load('C:/Codigos/Challenge/modelos_pcos/model_info.pkl')
+        modelo = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/modelo_gb_pcos.pkl')
+        scaler = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/scaler_pcos.pkl')
+        model_info = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/model_info.pkl')
         return modelo, scaler, model_info
     except:
         st.warning("Modelo no encontrado. Usando modo demo.")
