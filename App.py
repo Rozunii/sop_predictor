@@ -68,8 +68,8 @@ def predecir_pcos(datos, modelo, scaler):
     df_input = pd.DataFrame([datos])
     df_input = df_input[model_info['features']] # Reordenar columnas
         
-    X_scaled = scaler.transform(df_input)
-    probabilidad = modelo.predict_proba(X_scaled)[0][1]
+    X = df_input
+    probabilidad = modelo.predict_proba(X)[0][1]
     prediccion = "SOP" if probabilidad > 0.5 else "No SOP"
     
     if probabilidad < 0.3:
@@ -129,15 +129,15 @@ if pagina == "Predicción":
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
+
             st.markdown('<div class="critical-field">', unsafe_allow_html=True)
-            weight_gain = st.selectbox(
-                "Aumento de peso",
-                options=[0, 1],
-                format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Ganancia de peso inexplicable o dificultad para perder peso"
+            amh = st.number_input(
+                "AMH (ng/mL)",
+                min_value=0.0, max_value=20.0, value=3.0, step=0.1,
+                help="Hormona Antimülleriana. Normal: <4.0, SOP: >4.7"
             )
             st.markdown('</div>', unsafe_allow_html=True)
-            
+
             st.markdown('<div class="critical-field">', unsafe_allow_html=True)
             skin_darkening = st.selectbox(
                 "Oscurecimiento de piel (Acantosis)",
@@ -149,21 +149,22 @@ if pagina == "Predicción":
         
         with col3:
             st.markdown('<div class="critical-field">', unsafe_allow_html=True)
+            weight_gain = st.selectbox(
+                "Aumento de peso",
+                options=[0, 1],
+                format_func=lambda x: "No" if x == 0 else "Sí",
+                help="Ganancia de peso inexplicable o dificultad para perder peso"
+            )
+            st.markdown('</div>', unsafe_allow_html=True)
+
+            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
             endometrium = st.number_input(
                 "Grosor Endometrial (mm)",
                 min_value=3.0, max_value=20.0, value=8.0, step=0.1,
                 help="Grosor del endometrio medido por ecografía. Normal: 7-14mm"
             )
             st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
-            pimples = st.selectbox(
-                "Acné",
-                options=[0, 1],
-                format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Presencia de acné persistente"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
+
         
         st.markdown("---")
         st.subheader("Datos importantes")
@@ -172,24 +173,21 @@ if pagina == "Predicción":
         
         with col4:
             st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            amh = st.number_input(
-                "AMH (ng/mL)",
-                min_value=0.0, max_value=20.0, value=3.0, step=0.1,
-                help="Hormona Antimülleriana. Normal: <4.0, SOP: >4.7"
-            )
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            
             cycle_length = st.number_input(
                 "Días de sangrado menstrual",
                 min_value=0, max_value=12, value=5,
                 help="Duración del sangrado menstrual (0-12 días). Normal: 3-7 días"
             )
+            st.markdown('</div>', unsafe_allow_html=True)
+
             st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            bmi = st.number_input(
-                "IMC (kg/m²)",
-                min_value=15.0, max_value=45.0, value=23.0, step=0.1,
-                help="Índice de Masa Corporal"
+            cycle_ri = st.selectbox(
+                "Regularidad del ciclo",
+                options=[2, 4],
+                format_func=lambda x: "Regular" if x == 2 else "Irregular",
+                help="Regularidad del ciclo menstrual"
             )
+
         
         with col5:
             st.markdown('<div class="important-field">', unsafe_allow_html=True)
@@ -198,13 +196,8 @@ if pagina == "Predicción":
                 min_value=0.0, max_value=5.0, value=1.0, step=0.1,
                 help="Relación FSH/LH. Normal: >2, SOP: <1"
             )
-            
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            follicle_l = st.number_input(
-                "Folículos (Izquierdo)",
-                min_value=0, max_value=30, value=5,
-                help="Número de folículos en ovario izquierdo"
-            )
+            st.markdown('</div>', unsafe_allow_html=True)
+
             st.markdown('<div class="important-field">', unsafe_allow_html=True)
             age = st.number_input(
                 "Edad (años)",
@@ -219,19 +212,13 @@ if pagina == "Predicción":
                 min_value=2.0, max_value=25.0, value=10.0, step=0.1,
                 help="Tamaño promedio de folículos ovario izquierdo"
             )
-            
+            st.markdown('</div>', unsafe_allow_html=True)
+
             st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            cycle_ri = st.selectbox(
-                "Regularidad del ciclo",
-                options=[2, 4],
-                format_func=lambda x: "Regular" if x == 2 else "Irregular",
-                help="Regularidad del ciclo menstrual"
-            )
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            waist = st.number_input(
-                "Circunferencia de cintura (cm)",
-                min_value=50, max_value=150, value=80,
-                help="Medida de la cintura"
+            bmi = st.number_input(
+                "IMC (kg/m²)",
+                min_value=15.0, max_value=45.0, value=23.0, step=0.1,
+                help="Índice de Masa Corporal"
             )
         
         st.markdown("---")
@@ -266,6 +253,13 @@ if pagina == "Predicción":
             )
         
         with col9:
+            pimples = st.selectbox(
+                "Acné",
+                options=[0, 1],
+                format_func=lambda x: "No" if x == 0 else "Sí",
+                help="Presencia de acné persistente"
+            )
+
             fast_food = st.selectbox(
                 "Consumo de comida rápida",
                 options=[0, 1],
@@ -273,10 +267,6 @@ if pagina == "Predicción":
                 help="Consumo regular de comida rápida"
             )
             
-            hip = st.number_input(
-                "Circunferencia de cadera (cm)",
-                min_value=70, max_value=150, value=100
-            )
         
         # Botón de predicción
         submitted = st.form_submit_button("Realizar Predicción", type="primary", use_container_width=True)
@@ -285,7 +275,6 @@ if pagina == "Predicción":
             # Preparar datos
             datos = {
                 'Follicle_R': follicle_r,
-                'Follicle_L': follicle_l,
                 'Cycle_length': cycle_length,
                 'AMH': amh,
                 'BMI': bmi,
@@ -461,22 +450,6 @@ elif pagina == "Referencias Médicas":
         <p class="citation">Lim SS, et al. (2012). "Overweight, obesity and central obesity in women with polycystic 
         ovary syndrome: a systematic review and meta-analysis." Human Reproduction Update, 18(6): 618-637. 
         DOI: 10.1093/humupd/dms030</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("### Circunferencia de Cintura")
-        st.markdown("""
-        **Valores de Referencia (Mujeres):**
-        - Normal: < 80 cm (población asiática), < 88 cm (caucásica)
-        - Riesgo aumentado: 80-88 cm
-        - Riesgo muy alto: > 88 cm
-        
-        **Importancia Clínica:**
-        Indicador de obesidad central y resistencia a la insulina, factores clave en SOP.
-        
-        <p class="citation">WHO (2008). "Waist Circumference and Waist-Hip Ratio: Report of a WHO Expert Consultation." 
-        Geneva: World Health Organization.</p>
         """, unsafe_allow_html=True)
         st.markdown('</div>', unsafe_allow_html=True)
     
