@@ -5,308 +5,722 @@ import joblib
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime
+import warnings
+warnings.filterwarnings('ignore')
 
-# Configuración de la página
+# ====================== CONFIGURACIÓN ======================
 st.set_page_config(
-    page_title="Predictor de SOP",
+    page_title="SOP Predictor | Sistema de Análisis Clínico",
+    page_icon="",
     layout="wide",
     initial_sidebar_state="expanded"
 )
 
-# CSS personalizado
+# ====================== ESTILOS CSS PROFESIONALES ======================
 st.markdown("""
 <style>
-    .main-header {
-        font-size: 2.5rem;
-        color: #1f77b4;
+    /* Importar fuentes profesionales */
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=Space+Grotesk:wght@300;400;500;600;700&display=swap');
+    
+    /* Variables de color */
+    :root {
+        --crimson: #DC143C;
+        --light-crimson: #FFB6C1;
+        --light-crimson-soft: #FFC0CB;
+        --light-crimson-bg: #FFF0F5;
+        --dark-crimson: #8B0000;
+        --text-primary: #2D2D2D;
+        --text-secondary: #666666;
+        --text-light: #999999;
+        --bg-white: #FFFFFF;
+        --bg-gray: #F8F9FA;
+        --border-light: #E5E7EB;
+    }
+    
+    /* Reset y base */
+    .stApp {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFF5F7 100%);
+        font-family: 'Inter', sans-serif;
+    }
+    
+    /* Ocultar elementos por defecto de Streamlit */
+    #MainMenu, footer, header {visibility: hidden;}
+    .stDeployButton {display: none;}
+    
+    /* Tipografía principal */
+    .main-title {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 3.5rem;
+        font-weight: 700;
+        background: linear-gradient(135deg, var(--crimson) 0%, var(--light-crimson) 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
         text-align: center;
-        margin-bottom: 2rem;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.02em;
+        line-height: 1.2;
     }
+    
+    .main-subtitle {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.125rem;
+        font-weight: 400;
+        color: var(--text-secondary);
+        text-align: center;
+        margin-bottom: 3rem;
+        letter-spacing: 0.01em;
+    }
+    
+    /* Headers de sección */
     .section-header {
-        font-size: 1.8rem;
-        color: #2c5282;
-        margin-top: 2rem;
-        margin-bottom: 1rem;
-        padding: 10px;
-        background-color: #e6f2ff;
-        border-radius: 5px;
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2rem;
+        font-weight: 600;
+        color: var(--crimson);
+        margin: 2.5rem 0 1.5rem 0;
+        padding-bottom: 0.75rem;
+        border-bottom: 2px solid var(--light-crimson);
+        letter-spacing: -0.01em;
     }
-    .critical-field {
-        background-color: #ffebee;
-        padding: 10px;
-        border-radius: 5px;
-        border-left: 4px solid #f44336;
+    
+    .subsection-header {
+        font-family: 'Inter', sans-serif;
+        font-size: 1.25rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        margin: 1.5rem 0 1rem 0;
+        letter-spacing: -0.005em;
     }
-    .important-field {
-        background-color: #fff3e0;
-        padding: 10px;
-        border-radius: 5px;
-        border-left: 4px solid #ff9800;
+    
+    /* Tarjetas profesionales */
+    .info-card {
+        background: white;
+        border-radius: 16px;
+        padding: 2rem;
+        box-shadow: 0 4px 6px -1px rgba(220, 20, 60, 0.1), 
+                    0 2px 4px -1px rgba(220, 20, 60, 0.06);
+        border: 1px solid var(--light-crimson-soft);
+        margin: 1.5rem 0;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
     }
-    .reference-box {
-        background-color: #e3f2fd;
-        padding: 15px;
-        border-radius: 5px;
-        margin: 10px 0;
+    
+    .info-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 10px 15px -3px rgba(220, 20, 60, 0.15), 
+                    0 4px 6px -2px rgba(220, 20, 60, 0.08);
     }
-    .citation {
-        font-size: 0.85rem;
-        color: #555;
+    
+    /* Campos de formulario mejorados */
+    .field-container {
+        background: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin: 1rem 0;
+        border: 1px solid var(--border-light);
+        transition: all 0.2s ease;
+    }
+    
+    .field-container:hover {
+        border-color: var(--light-crimson);
+        box-shadow: 0 0 0 3px rgba(255, 182, 193, 0.1);
+    }
+    
+    .field-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-primary);
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        margin-bottom: 0.5rem;
+        display: block;
+    }
+    
+    .field-help {
+        font-size: 0.813rem;
+        color: var(--text-light);
+        margin-top: 0.25rem;
         font-style: italic;
     }
-    .info-box {
-        background-color: #e8f5e9;
-        padding: 15px;
-        border-radius: 5px;
-        border-left: 4px solid #4caf50;
-        margin: 10px 0;
+    
+    /* Categorías de campos */
+    .critical-field {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFF0F5 100%);
+        border-left: 4px solid var(--crimson);
+    }
+    
+    .important-field {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFF8FA 100%);
+        border-left: 4px solid var(--light-crimson);
+    }
+    
+    .optional-field {
+        background: var(--bg-gray);
+        border-left: 4px solid var(--border-light);
+    }
+    
+    /* Botones profesionales */
+    .stButton > button {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        background: linear-gradient(135deg, var(--crimson) 0%, var(--dark-crimson) 100%);
+        color: white;
+        border: none;
+        padding: 0.875rem 2.5rem;
+        border-radius: 50px;
+        font-size: 1rem;
+        letter-spacing: 0.02em;
+        text-transform: uppercase;
+        cursor: pointer;
+        transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        box-shadow: 0 4px 6px -1px rgba(220, 20, 60, 0.3);
+    }
+    
+    .stButton > button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 10px 15px -3px rgba(220, 20, 60, 0.4);
+        background: linear-gradient(135deg, var(--dark-crimson) 0%, var(--crimson) 100%);
+    }
+    
+    /* Métricas personalizadas */
+    .metric-container {
+        background: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(220, 20, 60, 0.08);
+        border: 1px solid var(--light-crimson-soft);
+        height: 100%;
+    }
+    
+    .metric-value {
+        font-family: 'Space Grotesk', sans-serif;
+        font-size: 2.5rem;
+        font-weight: 700;
+        color: var(--crimson);
+        margin: 0.5rem 0;
+        letter-spacing: -0.02em;
+    }
+    
+    .metric-label {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        font-weight: 600;
+        color: var(--text-secondary);
+        text-transform: uppercase;
+        letter-spacing: 0.08em;
+    }
+    
+    /* Tabs modernos */
+    .stTabs [data-baseweb="tab-list"] {
+        gap: 2rem;
+        border-bottom: 2px solid var(--light-crimson-soft);
+        padding: 0;
+    }
+    
+    .stTabs [data-baseweb="tab"] {
+        font-family: 'Inter', sans-serif;
+        font-weight: 500;
+        letter-spacing: 0.01em;
+        color: var(--text-secondary);
+        background-color: transparent;
+        border: none;
+        padding: 0.75rem 0;
+        transition: all 0.3s ease;
+    }
+    
+    .stTabs [data-baseweb="tab"]:hover {
+        color: var(--crimson);
+    }
+    
+    .stTabs [aria-selected="true"] {
+        color: var(--crimson);
+        border-bottom: 3px solid var(--crimson);
+        font-weight: 600;
+    }
+    
+    /* Referencias y citas */
+    .reference-box {
+        background: linear-gradient(135deg, #FFFFFF 0%, #FFF8FA 100%);
+        border: 1px solid var(--light-crimson-soft);
+        border-radius: 12px;
+        padding: 1.75rem;
+        margin: 1.5rem 0;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .reference-box::before {
+        content: "";
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 4px;
+        height: 100%;
+        background: linear-gradient(180deg, var(--crimson) 0%, var(--light-crimson) 100%);
+    }
+    
+    .citation {
+        font-family: 'Inter', sans-serif;
+        font-size: 0.875rem;
+        color: var(--text-light);
+        font-style: italic;
+        margin-top: 1rem;
+        padding-top: 1rem;
+        border-top: 1px solid var(--border-light);
+    }
+    
+    /* Alertas estilizadas */
+    .alert-box {
+        border-radius: 12px;
+        padding: 1.25rem 1.5rem;
+        margin: 1.5rem 0;
+        font-family: 'Inter', sans-serif;
+        font-size: 0.938rem;
+        line-height: 1.6;
+    }
+    
+    .alert-success {
+        background: linear-gradient(135deg, #F0FFF4 0%, #DCFCE7 100%);
+        border: 1px solid #86EFAC;
+        color: #166534;
+    }
+    
+    .alert-warning {
+        background: linear-gradient(135deg, #FFFBEB 0%, #FEF3C7 100%);
+        border: 1px solid #FCD34D;
+        color: #92400E;
+    }
+    
+    .alert-error {
+        background: linear-gradient(135deg, #FFF5F5 0%, #FED7D7 100%);
+        border: 1px solid #FCA5A5;
+        color: #991B1B;
+    }
+    
+    .alert-info {
+        background: linear-gradient(135deg, var(--light-crimson-bg) 0%, #FFE4E9 100%);
+        border: 1px solid var(--light-crimson);
+        color: var(--dark-crimson);
+    }
+    
+    /* Sidebar mejorado */
+    .css-1d391kg, .st-emotion-cache-1d391kg {
+        background: linear-gradient(180deg, #FFFFFF 0%, #FFF8FA 100%);
+        border-right: 1px solid var(--light-crimson-soft);
+    }
+    
+    /* Radio buttons personalizados */
+    .stRadio [role="radiogroup"] {
+        gap: 1rem;
+    }
+    
+    .stRadio [data-baseweb="radio"] {
+        background-color: white;
+        border: 2px solid var(--light-crimson);
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        transition: all 0.2s ease;
+        cursor: pointer;
+    }
+    
+    .stRadio [data-baseweb="radio"]:hover {
+        background-color: var(--light-crimson-bg);
+        transform: translateX(4px);
+    }
+    
+    /* Selectbox mejorado */
+    .stSelectbox > div > div {
+        background-color: white;
+        border: 1px solid var(--light-crimson);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .stSelectbox > div > div:hover {
+        border-color: var(--crimson);
+        box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+    }
+    
+    /* Input fields */
+    .stNumberInput > div > div > input,
+    .stTextInput > div > div > input {
+        background-color: white;
+        border: 1px solid var(--light-crimson);
+        border-radius: 8px;
+        font-family: 'Inter', sans-serif;
+        transition: all 0.2s ease;
+    }
+    
+    .stNumberInput > div > div > input:focus,
+    .stTextInput > div > div > input:focus {
+        border-color: var(--crimson);
+        box-shadow: 0 0 0 3px rgba(220, 20, 60, 0.1);
+        outline: none;
+    }
+    
+    /* Progress bar personalizado */
+    .stProgress > div > div > div > div {
+        background: linear-gradient(90deg, var(--light-crimson) 0%, var(--crimson) 100%);
+    }
+    
+    /* Expander mejorado */
+    .streamlit-expanderHeader {
+        font-family: 'Inter', sans-serif;
+        font-weight: 600;
+        color: var(--crimson);
+        background-color: var(--light-crimson-bg);
+        border: 1px solid var(--light-crimson);
+        border-radius: 8px;
+        transition: all 0.2s ease;
+    }
+    
+    .streamlit-expanderHeader:hover {
+        background-color: var(--light-crimson-soft);
+    }
+    
+    /* División de línea elegante */
+    hr {
+        margin: 3rem 0;
+        border: none;
+        height: 1px;
+        background: linear-gradient(90deg, transparent 0%, var(--light-crimson) 50%, transparent 100%);
+    }
+    
+    /* Footer personalizado */
+    .custom-footer {
+        text-align: center;
+        padding: 2rem 0;
+        margin-top: 4rem;
+        border-top: 1px solid var(--light-crimson-soft);
+        font-family: 'Inter', sans-serif;
+        color: var(--text-secondary);
+        font-size: 0.875rem;
+    }
+    
+    .custom-footer strong {
+        color: var(--crimson);
+        font-weight: 600;
     }
 </style>
 """, unsafe_allow_html=True)
 
-# Función para cargar modelo
+# ====================== FUNCIONES ======================
+
 @st.cache_resource
 def load_model():
+    """Cargar modelo y configuración"""
     try:
         modelo = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/modelo_gb_pcos.pkl')
         scaler = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/scaler_pcos.pkl')
         model_info = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/model_info.pkl')
         return modelo, scaler, model_info
     except:
-        st.warning("Modelo no encontrado. Usando modo demo.")
         return None, None, None
 
-# Función de predicción
+def create_risk_gauge(probability):
+    """Crear medidor visual de riesgo"""
+    fig = go.Figure(go.Indicator(
+        mode="gauge+number",
+        value=probability * 100,
+        title={'text': "Probabilidad de SOP", 
+               'font': {'size': 24, 'family': 'Space Grotesk, sans-serif', 'color': '#DC143C'}},
+        number={'suffix': "%", 'font': {'size': 40, 'family': 'Space Grotesk, sans-serif', 'color': '#DC143C'}},
+        gauge={
+            'axis': {'range': [0, 100], 'tickwidth': 2, 'tickcolor': "#FFB6C1"},
+            'bar': {'color': "#DC143C", 'thickness': 0.3},
+            'bgcolor': "white",
+            'borderwidth': 2,
+            'bordercolor': "#FFB6C1",
+            'steps': [
+                {'range': [0, 30], 'color': '#FFE4E9'},
+                {'range': [30, 60], 'color': '#FFB6C1'},
+                {'range': [60, 100], 'color': '#FF8FA3'}
+            ],
+            'threshold': {
+                'line': {'color': "#8B0000", 'width': 4},
+                'thickness': 0.75,
+                'value': probability * 100
+            }
+        }
+    ))
+    
+    fig.update_layout(
+        height=350,
+        margin=dict(l=20, r=20, t=40, b=20),
+        paper_bgcolor="rgba(0,0,0,0)",
+        plot_bgcolor="rgba(0,0,0,0)",
+        font={'family': 'Inter, sans-serif'}
+    )
+    
+    return fig
+
 def predecir_pcos(datos, modelo, scaler):
-    """Realiza predicción de SOP"""
-    # Crear DataFrame
+    """Realizar predicción de SOP"""
     df_input = pd.DataFrame([datos])
-    df_input = df_input[model_info['features']]  # Reordenar columnas
-        
-    X = df_input
-    probabilidad = modelo.predict_proba(X)[0][1]
-    prediccion = "SOP" if probabilidad > 0.5 else "No SOP"
+    
+    if 'features' in st.session_state.model_info:
+        df_input = df_input[st.session_state.model_info['features']]
+    
+    probabilidad = modelo.predict_proba(df_input)[0][1]
     
     if probabilidad < 0.3:
-        nivel_riesgo = "🟢 Bajo"
-        recomendacion = "Los indicadores sugieren bajo riesgo de SOP. Mantén controles periódicos."
-    elif probabilidad < 0.7:
-        nivel_riesgo = "🟡 Moderado"
-        recomendacion = "Riesgo moderado. Se recomienda evaluación médica detallada."
+        nivel = "BAJO"
+        color = "#22C55E"
+        mensaje = "Baja probabilidad de SOP"
+        recomendacion = "Mantén un estilo de vida saludable y controles ginecológicos anuales. Recuerda que esta herramienta es con fines educativos NO reemplaza los diagnosticos medicos ni es 100% segura."
+    elif probabilidad < 0.6:
+        nivel = "MODERADO"
+        color = "#F59E0B"
+        mensaje = "Riesgo moderado de SOP"
+        recomendacion = "Se recomienda consultar con un ginecólogo para una evaluación completa. Recuerda que esta herramienta es con fines educativos NO reemplaza los diagnosticos medicos ni es 100% segura."
     else:
-        nivel_riesgo = "🔴 Alto"
-        recomendacion = "Riesgo elevado. Consulta con un endocrinólogo o ginecólogo especialista."
+        nivel = "ALTO"
+        color = "#DC143C"
+        mensaje = "Alta probabilidad de SOP"
+        recomendacion = "Es importante consultar pronto con un especialista en endocrinología o ginecología. Recuerda que esta herramienta es con fines educativos NO reemplaza los diagnosticos medicos ni es 100% segura."
     
     return {
-        'prediccion': prediccion,
-        'probabilidad': f"{probabilidad:.1%}",
-        'probabilidad_num': probabilidad,
-        'nivel_riesgo': nivel_riesgo,
+        'probabilidad': probabilidad,
+        'nivel': nivel,
+        'color': color,
+        'mensaje': mensaje,
         'recomendacion': recomendacion
     }
 
-# Sidebar - Navegación
-st.sidebar.title("Navegación")
-pagina = st.sidebar.radio(
-    "Selecciona una sección:",
-    ["Predicción", "Referencias Médicas", "Información del Proyecto"]
-)
+# ====================== APLICACIÓN PRINCIPAL ======================
 
-modelo, scaler, model_info = load_model()
+# Inicializar estado
+if 'modelo' not in st.session_state:
+    modelo, scaler, model_info = load_model()
+    st.session_state.modelo = modelo
+    st.session_state.scaler = scaler
+    st.session_state.model_info = model_info or {}
 
-# ==================== PÁGINA 1: PREDICCIÓN ====================
-if pagina == "Predicción":
-    st.markdown('<h1 class="main-header">Predictor de Síndrome de Ovario Poliquístico (SOP)</h1>', 
-                unsafe_allow_html=True)
-    
-    st.markdown('<div class="info-box">', unsafe_allow_html=True)
-    st.markdown("""
-    ### ¿Cómo funciona esta evaluación?
-    
-    Esta herramienta te ayudará a evaluar tu riesgo de SOP en dos pasos:
-    
-    1. **Síntomas Visibles**: Primero, responderás preguntas sobre síntomas que puedes identificar tú misma
-    2. **Estudios Médicos** (opcional): Si tienes resultados de análisis o ultrasonidos, podrás agregarlos para una evaluación más precisa
-    
-    Si no cuentas con estudios médicos, ¡no te preocupes! La herramienta utilizará valores promedio para completar la evaluación.
-    """)
+# Header principal
+st.markdown('<h1 class="main-title">Sistema de Predicción SOP</h1>', unsafe_allow_html=True)
+st.markdown('<p class="main-subtitle">Análisis Estadístico de Biomarcadores y Factores Clínicos</p>', unsafe_allow_html=True)
+
+# Navegación
+tab1, tab2, tab3 = st.tabs(["ANÁLISIS PREDICTIVO", "REFERENCIAS MÉDICAS", "INFORMACIÓN"])
+
+# ====================== TAB 1: ANÁLISIS ======================
+with tab1:
+    st.markdown('<div class="info-card">', unsafe_allow_html=True)
+    col_info1, col_info2, col_info3 = st.columns(3)
+    with col_info1:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h3 style="color: #DC143C; font-family: 'Space Grotesk', sans-serif;">Paso 1</h3>
+            <p style="color: #666;">Complete los síntomas observables</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_info2:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h3 style="color: #DC143C; font-family: 'Space Grotesk', sans-serif;">Paso 2</h3>
+            <p style="color: #666;">Agregue estudios médicos (opcional)</p>
+        </div>
+        """, unsafe_allow_html=True)
+    with col_info3:
+        st.markdown("""
+        <div style="text-align: center;">
+            <h3 style="color: #DC143C; font-family: 'Space Grotesk', sans-serif;">Paso 3</h3>
+            <p style="color: #666;">Obtenga su evaluación de riesgo</p>
+        </div>
+        """, unsafe_allow_html=True)
     st.markdown('</div>', unsafe_allow_html=True)
     
-    with st.form("formulario_prediccion"):
-        # ============== SECCIÓN 1: SÍNTOMAS VISIBLES ==============
-        st.markdown('<div class="section-header">Síntomas que puedes identificar</div>', 
-                    unsafe_allow_html=True)
-        st.info("Responde estas preguntas basándote en lo que has observado en tu cuerpo")
+    with st.form("formulario_sop"):
+        # SECCIÓN 1: SÍNTOMAS OBSERVABLES
+        st.markdown('<h2 class="section-header">Síntomas Observables</h2>', unsafe_allow_html=True)
         
-        col1, col2 = st.columns(2)
+        col1, col2, col3 = st.columns(3)
         
         with col1:
-            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Aumento de Peso</label>', unsafe_allow_html=True)
             weight_gain = st.selectbox(
-                "¿Has experimentado aumento de peso sin razón aparente?",
+                "",
                 options=[0, 1],
                 format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Ganancia de peso inexplicable o dificultad para perder peso"
+                key="weight_gain",
+                label_visibility="collapsed"
             )
+            st.markdown('<p class="field-help">Sin causa aparente</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Hirsutismo</label>', unsafe_allow_html=True)
             hair_growth = st.selectbox(
-                "¿Tienes crecimiento excesivo de vello facial o corporal?",
+                "",
                 options=[0, 1],
                 format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Vello en zonas como mentón, pecho, espalda, abdomen (patrón masculino)"
+                key="hair_growth",
+                label_visibility="collapsed"
             )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
-            skin_darkening = st.selectbox(
-                "¿Tienes manchas oscuras en la piel?",
-                options=[0, 1],
-                format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Manchas oscuras especialmente en cuello, axilas o ingles (acantosis nigricans)"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
-            hair_loss = st.selectbox(
-                "¿Has notado pérdida de cabello o calvicie?",
-                options=[0, 1],
-                format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Pérdida de cabello en patrón masculino (especialmente en la coronilla)"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="critical-field">', unsafe_allow_html=True)
-            pimples = st.selectbox(
-                "¿Sufres de acné persistente?",
-                options=[0, 1],
-                format_func=lambda x: "No" if x == 0 else "Sí",
-                help="Acné que no mejora con tratamientos convencionales"
-            )
+            st.markdown('<p class="field-help">Vello excesivo facial/corporal</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col2:
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            cycle_length = st.number_input(
-                "¿Cuántos días dura tu sangrado menstrual?",
-                min_value=0, max_value=12, value=5,
-                help="Duración del sangrado menstrual. Normal: 3-7 días"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            cycle_ri = st.selectbox(
-                "¿Tu ciclo menstrual es regular?",
-                options=[2, 4],
-                format_func=lambda x: "Regular (cada 21-35 días)" if x == 2 else "Irregular (varía mucho o ausente)",
-                help="Regularidad del ciclo menstrual"
-            )
-            st.markdown('</div>', unsafe_allow_html=True)
-            
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            fast_food = st.selectbox(
-                "¿Consumes comida rápida frecuentemente?",
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Acantosis Nigricans</label>', unsafe_allow_html=True)
+            skin_darkening = st.selectbox(
+                "",
                 options=[0, 1],
-                format_func=lambda x: "No/Poco" if x == 0 else "Sí, frecuentemente",
-                help="Consumo regular de comida rápida o procesada"
+                format_func=lambda x: "No" if x == 0 else "Sí",
+                key="skin_darkening",
+                label_visibility="collapsed"
             )
+            st.markdown('<p class="field-help">Manchas oscuras en piel</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            age = st.number_input(
-                "Edad",
-                min_value=15, max_value=50, value=28,
-                help="Tu edad actual"
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Alopecia</label>', unsafe_allow_html=True)
+            hair_loss = st.selectbox(
+                "",
+                options=[0, 1],
+                format_func=lambda x: "No" if x == 0 else "Sí",
+                key="hair_loss",
+                label_visibility="collapsed"
             )
+            st.markdown('<p class="field-help">Pérdida de cabello</p>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col3:
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Acné Persistente</label>', unsafe_allow_html=True)
+            pimples = st.selectbox(
+                "",
+                options=[0, 1],
+                format_func=lambda x: "No" if x == 0 else "Sí",
+                key="pimples",
+                label_visibility="collapsed"
+            )
+            st.markdown('<p class="field-help">Resistente a tratamiento</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="important-field">', unsafe_allow_html=True)
-            bmi = st.number_input(
-                "IMC (kg/m²)",
-                min_value=15.0, max_value=45.0, value=23.0, step=0.1,
-                help="Índice de Masa Corporal. Si no lo sabes, usa una calculadora online con tu peso y altura"
+            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Consumo Comida Rápida</label>', unsafe_allow_html=True)
+            fast_food = st.selectbox(
+                "",
+                options=[0, 1],
+                format_func=lambda x: "Bajo" if x == 0 else "Frecuente",
+                key="fast_food",
+                label_visibility="collapsed"
             )
+            st.markdown('<p class="field-help">Frecuencia semanal</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
-        # ============== SECCIÓN 2: ESTUDIOS MÉDICOS (OPCIONAL) ==============
-        st.markdown("---")
-        st.markdown('<div class="section-header">Estudios Médicos (Opcional)</div>', 
-                    unsafe_allow_html=True)
+        # SECCIÓN 2: DATOS ANTROPOMÉTRICOS
+        st.markdown('<h2 class="section-header">Datos Antropométricos y Ciclo Menstrual</h2>', unsafe_allow_html=True)
         
-        tiene_estudios = st.checkbox(
-            "Tengo resultados de estudios médicos (análisis de sangre, ultrasonido, etc.)",
-            value=False,
-            help="Marca esta casilla si cuentas con resultados de laboratorio o ultrasonido"
-        )
+        col4, col5, col6, col7 = st.columns(4)
+        
+        with col4:
+            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Edad (años)</label>', unsafe_allow_html=True)
+            age = st.number_input("", min_value=15, max_value=50, value=28, key="age", label_visibility="collapsed")
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col5:
+            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">IMC (kg/m²)</label>', unsafe_allow_html=True)
+            bmi = st.number_input("", min_value=15.0, max_value=45.0, value=23.0, step=0.1, key="bmi", label_visibility="collapsed")
+            st.markdown('<p class="field-help">Normal: 18.5-24.9</p>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col6:
+            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Duración Sangrado (días)</label>', unsafe_allow_html=True)
+            cycle_length = st.number_input("", min_value=0, max_value=12, value=5, key="cycle_length", label_visibility="collapsed")
+            st.markdown('<p class="field-help">Normal: 3-7 días</p>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        with col7:
+            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<label class="field-label">Regularidad Ciclo</label>', unsafe_allow_html=True)
+            cycle_ri = st.selectbox(
+                "",
+                options=[2, 4],
+                format_func=lambda x: "Regular" if x == 2 else "Irregular",
+                key="cycle_ri",
+                label_visibility="collapsed"
+            )
+            st.markdown('<p class="field-help">21-35 días = regular</p>', unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
+        
+        # SECCIÓN 3: ESTUDIOS MÉDICOS
+        st.markdown('<h2 class="section-header">Estudios Médicos</h2>', unsafe_allow_html=True)
+        
+        tiene_estudios = st.checkbox("Tengo resultados de laboratorio disponibles", value=False)
         
         if tiene_estudios:
-            st.success("Excelente! Completa los estudios que tengas disponibles. Los campos que no conozcas se llenarán con valores normales.")
+            col8, col9, col10 = st.columns(3)
             
-            col3, col4, col5 = st.columns(3)
+            with col8:
+                st.markdown('<h3 class="subsection-header">Ultrasonido</h3>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">Folículos Ovario Derecho</label>', unsafe_allow_html=True)
+                follicle_r = st.number_input("", min_value=0, max_value=30, value=5, key="follicle_r", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: 2-10, SOP: >12</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">Grosor Endometrial (mm)</label>', unsafe_allow_html=True)
+                endometrium = st.number_input("", min_value=3.0, max_value=20.0, value=8.0, step=0.1, key="endometrium", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: 7-14 mm</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">Tamaño Promedio Folículos (mm)</label>', unsafe_allow_html=True)
+                avg_f_size_l = st.number_input("", min_value=2.0, max_value=25.0, value=10.0, step=0.1, key="avg_f_size_l", label_visibility="collapsed")
+                st.markdown('</div>', unsafe_allow_html=True)
             
-            with col3:
-                st.markdown("#### Ultrasonido")
-                follicle_r = st.number_input(
-                    "Folículos (Derecho)",
-                    min_value=0, max_value=30, value=5,
-                    help="Número de folículos en ovario derecho. Normal: 2-10, SOP: >12"
-                )
+            with col9:
+                st.markdown('<h3 class="subsection-header">Perfil Hormonal</h3>', unsafe_allow_html=True)
                 
-                endometrium = st.number_input(
-                    "Grosor Endometrial (mm)",
-                    min_value=3.0, max_value=20.0, value=8.0, step=0.1,
-                    help="Grosor del endometrio medido por ecografía. Normal: 7-14mm"
-                )
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">AMH (ng/mL)</label>', unsafe_allow_html=True)
+                amh = st.number_input("", min_value=0.0, max_value=20.0, value=3.0, step=0.1, key="amh", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: <4.0, SOP: >4.7</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
                 
-                avg_f_size_l = st.number_input(
-                    "Tamaño promedio folículos (mm)",
-                    min_value=2.0, max_value=25.0, value=10.0, step=0.1,
-                    help="Tamaño promedio de folículos"
-                )
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">FSH (mIU/mL)</label>', unsafe_allow_html=True)
+                fsh = st.number_input("", min_value=0.0, max_value=25.0, value=5.0, step=0.1, key="fsh", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: 3-10 mIU/mL</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
+                
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">Ratio FSH/LH</label>', unsafe_allow_html=True)
+                fsh_lh = st.number_input("", min_value=0.0, max_value=5.0, value=1.0, step=0.1, key="fsh_lh", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: >2, SOP: <1</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
             
-            with col4:
-                st.markdown("#### Hormonas")
-                amh = st.number_input(
-                    "AMH (ng/mL)",
-                    min_value=0.0, max_value=20.0, value=3.0, step=0.1,
-                    help="Hormona Antimülleriana. Normal: <4.0, SOP: >4.7"
-                )
+            with col10:
+                st.markdown('<h3 class="subsection-header">Otros Parámetros</h3>', unsafe_allow_html=True)
                 
-                fsh = st.number_input(
-                    "FSH (mIU/mL)",
-                    min_value=0.0, max_value=25.0, value=5.0, step=0.1,
-                    help="Hormona Folículo Estimulante. Normal: 3-10 mIU/mL"
-                )
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">Frecuencia Cardíaca (bpm)</label>', unsafe_allow_html=True)
+                pulse_rate = st.number_input("", min_value=50, max_value=120, value=72, key="pulse_rate", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: 60-100 bpm</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
                 
-                fsh_lh = st.number_input(
-                    "Ratio FSH/LH",
-                    min_value=0.0, max_value=5.0, value=1.0, step=0.1,
-                    help="Relación FSH/LH. Normal: >2, SOP: <1"
-                )
-            
-            with col5:
-                st.markdown("#### Otros")
-                pulse_rate = st.number_input(
-                    "Frecuencia cardíaca (bpm)",
-                    min_value=50, max_value=120, value=72,
-                    help="Pulso en reposo"
-                )
-                
-                hb = st.number_input(
-                    "Hemoglobina (g/dL)",
-                    min_value=8.0, max_value=18.0, value=12.0, step=0.1,
-                    help="Nivel de hemoglobina"
-                )
+                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<label class="field-label">Hemoglobina (g/dL)</label>', unsafe_allow_html=True)
+                hb = st.number_input("", min_value=8.0, max_value=18.0, value=12.0, step=0.1, key="hb", label_visibility="collapsed")
+                st.markdown('<p class="field-help">Normal: 12-16 g/dL</p>', unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
         else:
-            st.info("""
-            No te preocupes! Usaremos valores normales promedio para los estudios médicos.
+            st.markdown("""
+                <strong>Sin estudios médicos disponibles</strong><br>
+                Se utilizarán valores de referencia normales para el análisis. 
+                La evaluación se basará principalmente en los síntomas clínicos reportados.
+            """, unsafe_allow_html=True)
+            st.markdown('</div>', unsafe_allow_html=True)
             
-            La predicción se basará principalmente en los síntomas que has reportado, 
-            que son muy importantes para la evaluación inicial del SOP.
-            """)
-            
-            # Valores normales por defecto (SOLO LAS VARIABLES QUE EXISTEN EN EL MODELO ORIGINAL)
             follicle_r = 5
             endometrium = 8.0
             amh = 3.0
@@ -316,15 +730,16 @@ if pagina == "Predicción":
             pulse_rate = 72
             hb = 12.0
         
-        # Botón de predicción
-        st.markdown("---")
-        submitted = st.form_submit_button("Realizar Predicción", use_container_width=True)
+        st.markdown("<br>", unsafe_allow_html=True)
+        submitted = st.form_submit_button("GENERAR ANÁLISIS PREDICTIVO", use_container_width=True)
         
         if submitted:
-            if modelo is None:
-                st.error("El modelo no está disponible. Por favor, verifica la configuración.")
+            if st.session_state.modelo is None:
+                st.markdown('<div class="alert-box alert-error">', unsafe_allow_html=True)
+                st.markdown("Sistema no disponible. Por favor, verifique la configuración.", unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
             else:
-                # Preparar datos para predicción (SOLO LAS 18 VARIABLES DEL MODELO ORIGINAL)
+                # Preparar datos
                 datos = {
                     'Follicle_R': follicle_r,
                     'Cycle_length': cycle_length,
@@ -346,503 +761,187 @@ if pagina == "Predicción":
                     'Cycle_RI': cycle_ri
                 }
                 
-                # Realizar predicción
-                resultado = predecir_pcos(datos, modelo, scaler)
+                # Predicción
+                resultado = predecir_pcos(datos, st.session_state.modelo, st.session_state.scaler)
                 
-                # Mostrar resultados
-                st.markdown("---")
-                st.markdown("## Resultados de la Evaluación")
+                st.markdown('<h2 class="section-header">Resultados del Análisis</h2>', unsafe_allow_html=True)
                 
                 # Métricas principales
                 col_res1, col_res2, col_res3 = st.columns(3)
                 
                 with col_res1:
-                    st.metric(
-                        "Diagnóstico Predicho",
-                        resultado['prediccion'],
-                        delta=None
-                    )
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <p class="metric-label">Probabilidad SOP</p>
+                        <p class="metric-value">{resultado['probabilidad']*100:.1f}%</p>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 with col_res2:
-                    st.metric(
-                        "Probabilidad",
-                        resultado['probabilidad'],
-                        delta=None
-                    )
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <p class="metric-label">Nivel de Riesgo</p>
+                        <p class="metric-value" style="color: {resultado['color']};">{resultado['nivel']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 with col_res3:
-                    st.metric(
-                        "Nivel de Riesgo",
-                        resultado['nivel_riesgo'],
-                        delta=None
-                    )
+                    st.markdown(f"""
+                    <div class="metric-container">
+                        <p class="metric-label">Estado</p>
+                        <p class="metric-value" style="font-size: 1.5rem;">{resultado['mensaje']}</p>
+                    </div>
+                    """, unsafe_allow_html=True)
                 
                 # Gráfico de probabilidad
-                fig = go.Figure(go.Indicator(
-                    mode="gauge+number+delta",
-                    value=resultado['probabilidad_num'] * 100,
-                    domain={'x': [0, 1], 'y': [0, 1]},
-                    title={'text': "Probabilidad de SOP (%)", 'font': {'size': 24}},
-                    gauge={
-                        'axis': {'range': [None, 100], 'tickwidth': 1, 'tickcolor': "darkblue"},
-                        'bar': {'color': "darkblue"},
-                        'bgcolor': "white",
-                        'borderwidth': 2,
-                        'bordercolor': "gray",
-                        'steps': [
-                            {'range': [0, 30], 'color': '#90EE90'},
-                            {'range': [30, 70], 'color': '#FFD700'},
-                            {'range': [70, 100], 'color': '#FF6B6B'}
-                        ],
-                        'threshold': {
-                            'line': {'color': "red", 'width': 4},
-                            'thickness': 0.75,
-                            'value': 50
-                        }
-                    }
-                ))
-                
-                fig.update_layout(height=400)
+                st.markdown("<br>", unsafe_allow_html=True)
+                fig = create_risk_gauge(resultado['probabilidad'])
                 st.plotly_chart(fig, use_container_width=True)
                 
                 # Recomendaciones
-                st.markdown("### Recomendaciones")
-                st.info(resultado['recomendacion'])
+                st.markdown('<h3 class="subsection-header">Recomendaciones Clínicas</h3>', unsafe_allow_html=True)
                 
-                # Información adicional basada en síntomas
-                st.markdown("### Resumen de tus síntomas")
                 
-                sintomas_reportados = []
-                if weight_gain == 1:
-                    sintomas_reportados.append("Aumento de peso")
-                if hair_growth == 1:
-                    sintomas_reportados.append("Crecimiento excesivo de vello")
-                if skin_darkening == 1:
-                    sintomas_reportados.append("Manchas oscuras en la piel")
-                if hair_loss == 1:
-                    sintomas_reportados.append("Pérdida de cabello")
-                if pimples == 1:
-                    sintomas_reportados.append("Acné persistente")
-                if cycle_ri == 4:
-                    sintomas_reportados.append("Ciclo menstrual irregular")
+                st.markdown(f"<p style='font-size: 1.1rem; line-height: 1.8; color: #2D2D2D;'>{resultado['recomendacion']}</p>", unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
                 
-                if sintomas_reportados:
-                    st.write("Has reportado los siguientes síntomas:")
-                    for sintoma in sintomas_reportados:
-                        st.write(sintoma)
-                else:
-                    st.write("No has reportado síntomas significativos.")
-                
-                # Advertencia importante
-                st.markdown("---")
-                st.warning("""
-                **IMPORTANTE**: Esta herramienta es solo para fines educativos y de orientación inicial.
-                
-                - NO reemplaza el diagnóstico médico profesional
-                - El diagnóstico definitivo de SOP debe hacerlo un ginecólogo o endocrinólogo
-                - Se requieren estudios médicos completos para confirmar el diagnóstico
-                - Si tienes síntomas preocupantes, consulta a un profesional de la salud
-                """)
-                
-                if not tiene_estudios:
-                    st.info("""
-                    📌 **Nota**: Esta predicción se realizó sin estudios médicos completos.
-                    Para una evaluación más precisa, te recomendamos:
+                # Síntomas detectados
+                if any([weight_gain, hair_growth, skin_darkening, hair_loss, pimples, cycle_ri == 4]):
+                    st.markdown('<h3 class="subsection-header">Síntomas Detectados</h3>', unsafe_allow_html=True)
                     
-                    1. Acudir con un ginecólogo o endocrinólogo
-                    2. Solicitar un ultrasonido transvaginal
-                    3. Realizar análisis hormonales (FSH, LH, AMH, etc.)
-                    4. Volver a usar esta herramienta con tus resultados
-                    """)
+                    sintomas = []
+                    if weight_gain: sintomas.append("Aumento de peso inexplicable")
+                    if hair_growth: sintomas.append("Hirsutismo")
+                    if skin_darkening: sintomas.append("Acantosis nigricans")
+                    if hair_loss: sintomas.append("Alopecia androgénica")
+                    if pimples: sintomas.append("Acné persistente")
+                    if cycle_ri == 4: sintomas.append("Ciclo menstrual irregular")
+                    
+                    cols_sint = st.columns(2)
+                    for i, sintoma in enumerate(sintomas):
+                        with cols_sint[i % 2]:
+                            st.markdown(f"""
+                            <div style='padding: 0.5rem; margin: 0.25rem 0; border-left: 3px solid #DC143C; background: #FFF5F7;'>
+                                <span style='color: #2D2D2D; font-weight: 500;'>{sintoma}</span>
+                            </div>
+                            """, unsafe_allow_html=True)
+                
+                # Advertencia legal
+                st.markdown("<br><br>", unsafe_allow_html=True)
+                st.markdown('<div class="alert-box alert-warning">', unsafe_allow_html=True)
+                st.markdown("""
+                <strong>AVISO MÉDICO IMPORTANTE</strong><br>
+                Esta herramienta proporciona únicamente una evaluación de riesgo basada en análisis estadístico 
+                y no constituye un diagnóstico médico. El diagnóstico definitivo de SOP debe ser realizado 
+                por un profesional médico cualificado mediante evaluación clínica completa.
+                """, unsafe_allow_html=True)
+                st.markdown('</div>', unsafe_allow_html=True)
 
-# ==================== PÁGINA 2: REFERENCIAS MÉDICAS ====================
-elif pagina == "Referencias Médicas":
-    st.markdown('<h1 class="main-header">Referencias Médicas y Valores de Referencia</h1>', 
-                unsafe_allow_html=True)
+# ====================== TAB 2: REFERENCIAS ======================
+with tab2:
+    st.markdown('<h2 class="section-header">Referencias Médicas y Criterios Diagnósticos</h2>', unsafe_allow_html=True)
     
-    tab1, tab2, tab3, tab4 = st.tabs([
-        "Criterios Diagnósticos", 
-        "Hormonas y Biomarcadores",
-        "Valores Clínicos",
-        "Bibliografía"
-    ])
-    
-    with tab1:
-        st.subheader("Criterios de Rotterdam para Diagnóstico de SOP")
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Criterios de Rotterdam (2003)
-        
-        El diagnóstico de SOP requiere **al menos 2 de los siguientes 3 criterios:**
-        
-        1. **Oligoovulación o anovulación**
-           - Manifestada por irregularidades menstruales
-           - Ciclos menstruales > 35 días o < 8 ciclos por año
-        
-        2. **Hiperandrogenismo clínico y/o bioquímico**
-           - Clínico: Hirsutismo (escala Ferriman-Gallwey ≥ 8), acné, alopecia
-           - Bioquímico: Niveles elevados de andrógenos (testosterona, DHEA-S, androstenediona)
-        
-        3. **Ovarios poliquísticos en ultrasonido**
-           - ≥12 folículos de 2-9 mm de diámetro en al menos un ovario, o
-           - Volumen ovárico aumentado (>10 cm³)
-        
-        **Importante:** Se deben excluir otras causas de hiperandrogenismo y anovulación.
-        
-        <p class="citation">Rotterdam ESHRE/ASRM-Sponsored PCOS Consensus Workshop Group. (2004). 
-        "Revised 2003 consensus on diagnostic criteria and long-term health risks related to polycystic ovary syndrome." 
-        Fertility and Sterility, 81(1): 19-25. DOI: 10.1016/j.fertnstert.2003.10.004</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Guías Internacionales 2023
-        
-        Las guías más recientes enfatizan:
-        - Uso de ultrasonido transvaginal de alta resolución
-        - Umbral aumentado: ≥20 folículos por ovario (en mujeres adultas)
-        - Consideración del contexto clínico completo
-        - Evaluación de comorbilidades metabólicas
-        
-        <p class="citation">Teede HJ, et al. (2023). "Recommendations from the 2023 International Evidence-based 
-        Guideline for the Assessment and Management of Polycystic Ovary Syndrome." 
-        Journal of Clinical Endocrinology & Metabolism, 108(10): 2447-2469. DOI: 10.1210/clinem/dgad463</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with tab2:
-        st.subheader("Valores de Referencia - Hormonas y Biomarcadores")
-        
-        # Tabla de valores hormonales
-        hormones_data = {
-            'Hormona': ['FSH', 'LH', 'Relación LH/FSH', 'AMH', 'TSH', 'Prolactina', 'Vitamina D3'],
-            'Unidad': ['mIU/mL', 'mIU/mL', 'Ratio', 'ng/mL', 'mIU/L', 'ng/mL', 'ng/mL'],
-            'Rango Normal': ['3-10', '2-15', '<2', '<4.0', '0.4-4.0', '<25', '>30'],
-            'SOP': ['Normal/bajo', 'Elevado', '>2-3', '>4.7', 'Normal', 'Normal/elevado', 'Frecuentemente bajo'],
-            'Significado Clínico': [
-                'Fase folicular. Bajo puede indicar función ovárica disminuida',
-                'Elevado en SOP. Estimula producción de andrógenos',
-                'Invertida en SOP. Indicador diagnóstico importante',
-                'Marcador de reserva ovárica. Muy elevado en SOP',
-                'Detecta disfunción tiroidea que puede simular SOP',
-                'Elevada puede causar amenorrea. Excluir prolactinoma',
-                'Deficiencia común en SOP. Afecta metabolismo'
-            ]
-        }
-        
-        df_hormones = pd.DataFrame(hormones_data)
-        st.dataframe(df_hormones, use_container_width=True, hide_index=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Hormona Antimülleriana (AMH)
-        
-        **Valores de Referencia:**
-        - Normal: 1.0 - 4.0 ng/mL
-        - SOP: > 4.7 ng/mL (alta especificidad)
-        - Reserva ovárica baja: < 1.0 ng/mL
-        
-        **Importancia en SOP:**
-        La AMH es producida por folículos antrales pequeños. En SOP, el número excesivo de 
-        folículos resulta en niveles muy elevados de AMH, convirtiéndola en un marcador 
-        diagnóstico valioso con alta especificidad (88%) y sensibilidad (82%).
-        
-        <p class="citation">Dewailly D, et al. (2014). "Diagnosis of polycystic ovary syndrome (PCOS): 
-        revisiting the threshold values of follicle count on ultrasound and of the serum AMH level 
-        for the definition of polycystic ovaries." Human Reproduction, 29(11): 2427-2436. 
-        DOI: 10.1093/humrep/deu234</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Relación LH/FSH
-        
-        **Interpretación:**
-        - Normal: < 2
-        - SOP clásico: 2-3 o mayor
-        - Sensibilidad: ~40% (no todas las mujeres con SOP tienen relación elevada)
-        
-        **Fisiopatología:**
-        La secreción aumentada de LH en SOP estimula las células de la teca ovárica para 
-        producir más andrógenos, contribuyendo al hiperandrogenismo característico.
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with tab3:
-        st.subheader("Valores Clínicos y Antropométricos")
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Índice de Masa Corporal (IMC/BMI)
-        
-        **Clasificación OMS:**
-        - Bajo peso: < 18.5 kg/m²
-        - Normal: 18.5 - 24.9 kg/m²
-        - Sobrepeso: 25.0 - 29.9 kg/m²
-        - Obesidad Grado I: 30.0 - 34.9 kg/m²
-        - Obesidad Grado II: 35.0 - 39.9 kg/m²
-        - Obesidad Grado III: ≥ 40.0 kg/m²
-        
-        **Relevancia en SOP:**
-        - 40-80% de mujeres con SOP tienen sobrepeso/obesidad
-        - La obesidad agrava la resistencia a la insulina y el hiperandrogenismo
-        - Pérdida de 5-10% del peso puede mejorar significativamente los síntomas
-        
-        <p class="citation">Lim SS, et al. (2012). "Overweight, obesity and central obesity in women 
-        with polycystic ovary syndrome: a systematic review and meta-analysis." Human Reproduction Update, 
-        18(6): 618-637. DOI: 10.1093/humupd/dms030</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Relación Cintura-Cadera (Waist-Hip Ratio)
-        
-        **Valores de Riesgo (Mujeres):**
-        - Normal: < 0.80
-        - Riesgo moderado: 0.80 - 0.85
-        - Riesgo alto: > 0.85
-        
-        **Circunferencia de Cintura:**
-        - Normal: < 80 cm
-        - Riesgo elevado: ≥ 80 cm
-        - Riesgo muy elevado: ≥ 88 cm
-        
-        **Importancia:**
-        La obesidad central (distribución androide) es común en SOP y se asocia con:
-        - Mayor resistencia a la insulina
-        - Riesgo cardiovascular aumentado
-        - Perfil metabólico adverso
-        
-        <p class="citation">World Health Organization. (2008). "Waist Circumference and Waist-Hip Ratio: 
-        Report of a WHO Expert Consultation." Geneva: World Health Organization.</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Morfología Ovárica en Ultrasonido
-        
-        **Criterios de Rotterdam (Actualizados 2014):**
-        - Folículos: ≥ 12 folículos de 2-9 mm por ovario (transductores antiguos)
-        - Folículos: ≥ 20 folículos de 2-9 mm por ovario (transductores modernos ≥8 MHz)
-        - Volumen ovárico: > 10 cm³
-        
-        **Técnica Recomendada:**
-        - Ultrasonido transvaginal preferido sobre transabdominal
-        - Evaluación en fase folicular temprana (días 3-5 del ciclo)
-        - Medición 2D en corte transversal del ovario
-        
-        <p class="citation">Dewailly D, et al. (2011). "Definition and significance of polycystic ovarian morphology: 
-        a task force report from the Androgen Excess and Polycystic Ovary Syndrome Society." 
-        Human Reproduction Update, 17(5): 667-685. DOI: 10.1093/humupd/dmr013</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("""
-        ### Parámetros del Ciclo Menstrual
-        
-        **Duración del Ciclo:**
-        - Normal: 21-35 días
-        - Oligomenorrea: > 35 días
-        - Amenorrea: Ausencia de menstruación por > 90 días
-        
-        **Duración del Sangrado:**
-        - Normal: 3-7 días
-        - Oligomenorrea: < 3 días
-        - Menorragia: > 7 días
-        
-        **Relación con SOP:**
-        La oligomenorrea y amenorrea son comunes en SOP debido a anovulación crónica.
-        
-        <p class="citation">Fraser IS, et al. (2011). "The FIGO recommendations on terminologies and definitions 
-        for normal and abnormal uterine bleeding." Seminars in Reproductive Medicine, 29(5): 383-390. 
-        DOI: 10.1055/s-0031-1287662</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("### Grosor Endometrial")
-        st.markdown("""
-        **Valores de Referencia (Fase Folicular):**
-        - Normal: 7-14 mm
-        - Preocupante: > 14 mm (riesgo de hiperplasia)
-        - SOP: Variable, mayor riesgo de hiperplasia endometrial
-        
-        **Importancia Clínica:**
-        La anovulación crónica en SOP puede causar estimulación estrogénica prolongada 
-        sin oposición de progesterona, aumentando el riesgo de hiperplasia endometrial.
-        
-        <p class="citation">Gallos ID, et al. (2012). "Regression, relapse, and live birth rates with fertility-preserving 
-        therapy for endometrial hyperplasia and cancer." American Journal of Obstetrics & Gynecology, 207(4): 266.e1-12. 
-        DOI: 10.1016/j.ajog.2012.08.011</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-        
-        st.markdown('<div class="reference-box">', unsafe_allow_html=True)
-        st.markdown("### Hirsutismo (Escala de Ferriman-Gallwey)")
-        st.markdown("""
-        **Puntuación:**
-        - Normal: < 8 puntos
-        - Hirsutismo leve: 8-15 puntos
-        - Hirsutismo moderado: 16-25 puntos
-        - Hirsutismo severo: > 25 puntos
-        
-        **Prevalencia en SOP:**
-        60-70% de mujeres con SOP presentan hirsutismo debido al exceso de andrógenos.
-        
-        <p class="citation">Yildiz BO, et al. (2010). "Prevalence, phenotype and cardiometabolic risk of polycystic 
-        ovary syndrome under different diagnostic criteria." Human Reproduction, 25(5): 1229-1237. 
-        DOI: 10.1093/humrep/deq020</p>
-        """, unsafe_allow_html=True)
-        st.markdown('</div>', unsafe_allow_html=True)
-    
-    with tab4:
-        st.subheader("Referencias Bibliográficas Completas")
-        
-        st.markdown("""
-        ### Guías Clínicas Internacionales
-        
-        1. **Teede HJ, et al. (2023).** "Recommendations from the 2023 International Evidence-based Guideline 
-           for the Assessment and Management of Polycystic Ovary Syndrome." *Journal of Clinical Endocrinology & Metabolism*, 
-           108(10): 2447-2469. DOI: 10.1210/clinem/dgad463
-        
-        2. **Rotterdam ESHRE/ASRM-Sponsored PCOS Consensus Workshop Group (2004).** "Revised 2003 consensus on 
-           diagnostic criteria and long-term health risks related to polycystic ovary syndrome." 
-           *Fertility and Sterility*, 81(1): 19-25. DOI: 10.1016/j.fertnstert.2003.10.004
-        
-        ### Biomarcadores y Diagnóstico
-        
-        3. **Dewailly D, et al. (2014).** "Diagnosis of polycystic ovary syndrome (PCOS): revisiting the threshold 
-           values of follicle count on ultrasound and of the serum AMH level for the definition of polycystic ovaries." 
-           *Human Reproduction*, 29(11): 2427-2436. DOI: 10.1093/humrep/deu234
-        
-        4. **Dewailly D, et al. (2011).** "Definition and significance of polycystic ovarian morphology: a task force 
-           report from the Androgen Excess and Polycystic Ovary Syndrome Society." *Human Reproduction Update*, 
-           17(5): 667-685. DOI: 10.1093/humupd/dmr013
-        
-        ### Epidemiología y Factores de Riesgo
-        
-        5. **Lim SS, et al. (2012).** "Overweight, obesity and central obesity in women with polycystic ovary syndrome: 
-           a systematic review and meta-analysis." *Human Reproduction Update*, 18(6): 618-637. 
-           DOI: 10.1093/humupd/dms030
-        
-        6. **Yildiz BO, et al. (2010).** "Prevalence, phenotype and cardiometabolic risk of polycystic ovary syndrome 
-           under different diagnostic criteria." *Human Reproduction*, 25(5): 1229-1237. DOI: 10.1093/humrep/deq020
-        
-        ### Fisiopatología
-        
-        7. **Patel S. (2018).** "Polycystic ovary syndrome (PCOS), an inflammatory, systemic, lifestyle endocrinopathy." 
-           *Journal of Steroid Biochemistry and Molecular Biology*, 182: 27-36. DOI: 10.1016/j.jsbmb.2018.04.008
-        
-        ### Complicaciones y Manejo
-        
-        8. **Gallos ID, et al. (2012).** "Regression, relapse, and live birth rates with fertility-preserving therapy 
-           for endometrial hyperplasia and cancer." *American Journal of Obstetrics & Gynecology*, 207(4): 266.e1-12. 
-           DOI: 10.1016/j.ajog.2012.08.011
-        
-        9. **Fraser IS, et al. (2011).** "The FIGO recommendations on terminologies and definitions for normal and 
-           abnormal uterine bleeding." *Seminars in Reproductive Medicine*, 29(5): 383-390. DOI: 10.1055/s-0031-1287662
-        
-        ### Organizaciones de Referencia
-        
-        10. **World Health Organization (WHO).** (2008). "Waist Circumference and Waist-Hip Ratio: Report of a WHO 
-            Expert Consultation." Geneva: World Health Organization.
-        
-        ---
-        
-        ### Bases de Datos Consultadas
-        - PubMed/MEDLINE
-        - Cochrane Library
-        - Google Scholar
-        - Web of Science
-        
-        ### Última Actualización
-        Noviembre 2025
-        
-        ### Nota Importante
-        Esta información es para fines educativos. Los valores de referencia pueden variar según el laboratorio, 
-        la población y el método de medición. Siempre consulte con un profesional de la salud calificado.
-        """)
-
-# ==================== PÁGINA 3: INFORMACIÓN DEL PROYECTO ====================
-elif pagina == "Información del Proyecto":
-    st.markdown('<h1 class="main-header">Información del Proyecto</h1>', unsafe_allow_html=True)
+    # Criterios de Rotterdam
+    st.markdown('<h3 class="subsection-header">Criterios de Rotterdam (2003)</h3>', unsafe_allow_html=True)
     
     st.markdown("""
-    ## Análisis Estadístico de Biomarcadores y Factores Asociados al SOP
+    **Diagnóstico de SOP requiere 2 de 3 criterios:**
     
-    ### Equipo: Los Poliquísticos
-    - Bernardo Alejandro Partidas Díaz
-    - Oscar Josue López González
-    - Rodrigo Alonso Castillo Ramírez
-    - Sebastian Sánchez Espinosa
+    1. **Oligoovulación o anovulación**
+       - Ciclos menstruales > 35 días
+       - Menos de 8 ciclos por año
     
-    ### Institución
-    Centro Universitario de Guadalajara (CUGDL) - Universidad de Guadalajara  
-    **Asignatura:** Probabilidad y Estadística II  
-    **Profesora:** Claudia Fabiola
+    2. **Hiperandrogenismo**
+       - Clínico: Hirsutismo (Ferriman-Gallwey ≥ 8), acné, alopecia
+       - Bioquímico: Andrógenos elevados
     
-    ### Dataset
-    - **Total de observaciones:** 541 pacientes
-    - **Total de variables:** 42 características
-    - **Variables predictoras utilizadas:** 18
+    3. **Morfología ovárica poliquística**
+       - ≥12 folículos (2-9 mm) por ovario
+       - Volumen ovárico > 10 cm³
     
-    ### Modelo de Machine Learning
-    - **Algoritmo:** Gradient Boosting Classifier
-    - **Accuracy:** 89.81%
-    - **AUC-ROC:** 0.9542
-    - **Variables más importantes:**
-      1. Follicle_R (47.6%)
-      2. Hair_growth (7.5%)
-      3. Weight_gain (7.2%)
-      4. Skin_darkening (5.9%)
-      5. AMH (4.4%)
+    <p class="citation">Rotterdam ESHRE/ASRM Consensus Workshop Group (2004). Fertility and Sterility, 81(1): 19-25.</p>
+    """, unsafe_allow_html=True)
+    st.markdown('</div>', unsafe_allow_html=True)
     
-    ### Metodología Estadística
-    - Pruebas de hipótesis (Mann-Whitney U, Chi-cuadrado)
-    - Análisis de correlación (Spearman, V-Cramer)
-    - Modelos de clasificación (Gradient Boosting, Random Forest, SVM, etc.)
-    - Validación cruzada
-    - Análisis de importancia de características (SHAP y sklearn)
+    # Biomarcadores
+    st.markdown('<h3 class="subsection-header">Biomarcadores Principales</h3>', unsafe_allow_html=True)
     
-    ### Objetivos del Proyecto
-    1. Identificar patrones y diferencias significativas en variables clínicas, hormonales y de estilo de vida
-    2. Desarrollar un modelo predictivo para SOP
-    3. Determinar las variables más discriminantes
-    4. Aplicar métodos de probabilidad y estadística en un caso biomédico real
+    biomarcadores = pd.DataFrame({
+        'Biomarcador': ['AMH', 'Relación LH/FSH', 'Testosterona Total', 'DHEA-S', 'Índice FAI'],
+        'Valor Normal': ['1.0-4.0 ng/mL', '< 2', '< 70 ng/dL', '35-430 μg/dL', '< 4.5'],
+        'SOP': ['> 4.7 ng/mL', '> 2-3', '> 70 ng/dL', 'Elevado', '> 4.5'],
+        'Sensibilidad': ['82%', '40%', '70%', '35%', '75%'],
+        'Especificidad': ['88%', '95%', '75%', '90%', '85%']
+    })
     
-    ### Resultados Esperados
-    - Reporte estadístico completo
-    - Modelo predictivo funcional
-    - Visualizaciones interactivas
-    - Aplicación web para uso clínico educativo
+    st.dataframe(biomarcadores, use_container_width=True, hide_index=True)
     
-    ---
+    # Referencias bibliográficas
+    st.markdown('<h3 class="subsection-header">Bibliografía Esencial</h3>', unsafe_allow_html=True)
     
-    ### Disclaimer
-    Esta herramienta fue desarrollada con fines educativos como parte de un proyecto académico. 
-    **NO debe utilizarse como herramienta de diagnóstico médico**. El diagnóstico de SOP debe 
-    realizarse por un profesional de la salud calificado según los criterios de Rotterdam y las 
-    guías clínicas internacionales.
+    referencias = [
+        "Teede HJ, et al. (2023). International Evidence-based Guideline for PCOS. J Clin Endocrinol Metab.",
+        "Dewailly D, et al. (2014). AMH as diagnostic marker for PCOS. Hum Reprod.",
+        "Yildiz BO, et al. (2010). Prevalence and phenotypes of PCOS. Hum Reprod.",
+        "Fraser IS, et al. (2011). FIGO recommendations on uterine bleeding. Semin Reprod Med."
+    ]
     
-    ### Contacto
-    Para más información sobre este proyecto, contactar a través del Centro Universitario de Guadalajara (CUGDL).
-    
-    ---
-    """)
+    for ref in referencias:
+        st.markdown(f"""
+        <div style='padding: 0.5rem; margin: 0.5rem 0; border-left: 2px solid #FFB6C1; background: #FFF8FA;'>
+            <span style='color: #666; font-size: 0.9rem;'>{ref}</span>
+        </div>
+        """, unsafe_allow_html=True)
 
-# Footer
-st.sidebar.markdown("---")
-st.sidebar.markdown("""
-<div style='text-align: center; color: #666; font-size: 0.8rem;'>
-    <p>Predictor de SOP v2.0</p>
-    <p>Proyecto Académico - CUGDL UDG</p>
-    <p>Noviembre 2025</p>
-    <p><em>Versión Accesible</em></p>
-</div>
-""", unsafe_allow_html=True)
+# ====================== TAB 3: INFORMACIÓN ======================
+with tab3:
+    st.markdown('<h2 class="section-header">Información del Proyecto</h2>', unsafe_allow_html=True)
+    
+    col_info1, col_info2 = st.columns([2, 1])
+    
+    with col_info1:
+        st.markdown("""
+        <h3 style="color: #DC143C; font-family: 'Space Grotesk', sans-serif;">Equipo de Desarrollo</h3>
+        
+        **Los Poliquísticos**
+        - Bernardo Alejandro Partidas Díaz
+        - Oscar Josue López González  
+        - Rodrigo Alonso Castillo Ramírez
+        - Sebastian Sánchez Espinosa
+        
+        <hr style='margin: 1.5rem 0; opacity: 0.3;'>
+        
+        **Centro Universitario de Guadalajara (CUGDL)**  
+        Universidad de Guadalajara  
+        
+        Asignatura: Probabilidad y Estadística II  
+        Profesora: Claudia Fabiola
+        """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    with col_info2:
+        st.markdown("""
+        <h3 style="color: #DC143C; font-family: 'Space Grotesk', sans-serif;">Métricas del Modelo</h3>
+        
+        **Gradient Boosting Classifier**
+        - Accuracy: 87.04%
+        - AUC-ROC: 0.9491
+        - Sensibilidad: 85.71%
+        - Especificidad: 87.67%
+        
+        **Dataset**
+        - 541 pacientes
+        - 42 variables totales
+        - 18 características predictoras
+        """, unsafe_allow_html=True)
+        st.markdown('</div>', unsafe_allow_html=True)
+    
+    # Footer
+    st.markdown("<br><br>", unsafe_allow_html=True)
+    st.markdown("""
+    <div class="custom-footer">
+        <strong>SOP Predictor v3.0</strong> | Proyecto Académico CUGDL<br>
+        Universidad de Guadalajara | Noviembre 2025<br>
+        <span style='font-size: 0.75rem;'>Desarrollado con fines educativos y de investigación</span>
+    </div>
+    """, unsafe_allow_html=True)
