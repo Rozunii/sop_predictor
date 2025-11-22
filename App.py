@@ -5,6 +5,7 @@ import joblib
 import plotly.graph_objects as go
 import plotly.express as px
 from datetime import datetime
+import os
 import warnings
 warnings.filterwarnings('ignore')
 
@@ -411,11 +412,22 @@ st.markdown("""
 def load_model():
     """Cargar modelo y configuración"""
     try:
-        modelo = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/modelo_gb_pcos.pkl')
-        scaler = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/scaler_pcos.pkl')
-        model_info = joblib.load('C:/Codigos/Challenge/predictor-sop/modelos_pcos/model_info.pkl')
+        # 1. Obtener la ruta absoluta de donde está ESTE archivo (App2.py)
+        ruta_base = os.path.dirname(os.path.abspath(__file__))
+        
+        # 2. Construir las rutas completas automáticamente
+        ruta_modelo = os.path.join(ruta_base, 'modelos_pcos', 'modelo_gb_pcos.pkl')
+        ruta_scaler = os.path.join(ruta_base, 'modelos_pcos', 'scaler_pcos.pkl')
+        ruta_info = os.path.join(ruta_base, 'modelos_pcos', 'model_info.pkl')
+
+        # 3. Cargar usando esas rutas construidas
+        modelo = joblib.load(ruta_modelo)
+        scaler = joblib.load(ruta_scaler)
+        model_info = joblib.load(ruta_info)
+        
         return modelo, scaler, model_info
-    except:
+    except Exception as e:
+        st.error(f"Error cargando modelos: {e}")
         return None, None, None
 
 def create_risk_gauge(probability):
