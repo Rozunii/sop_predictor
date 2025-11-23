@@ -587,7 +587,7 @@ with tab1:
             st.markdown('<p class="field-help">Manchas oscuras en piel</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
             st.markdown('<label class="field-label">Alopecia</label>', unsafe_allow_html=True)
             hair_loss = st.selectbox(
                 "",
@@ -600,7 +600,7 @@ with tab1:
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col3:
-            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
             st.markdown('<label class="field-label">Acné Persistente</label>', unsafe_allow_html=True)
             pimples = st.selectbox(
                 "",
@@ -612,7 +612,7 @@ with tab1:
             st.markdown('<p class="field-help">Resistente a tratamiento</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
             
-            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
             st.markdown('<label class="field-label">Consumo Comida Rápida</label>', unsafe_allow_html=True)
             fast_food = st.selectbox(
                 "",
@@ -643,14 +643,14 @@ with tab1:
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col6:
-            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
             st.markdown('<label class="field-label">Duración Sangrado (días)</label>', unsafe_allow_html=True)
             cycle_length = st.number_input("", min_value=0, max_value=12, value=5, key="cycle_length", label_visibility="collapsed")
             st.markdown('<p class="field-help">Normal: 3-7 días</p>', unsafe_allow_html=True)
             st.markdown('</div>', unsafe_allow_html=True)
         
         with col7:
-            st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
+            st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
             st.markdown('<label class="field-label">Regularidad Ciclo</label>', unsafe_allow_html=True)
             cycle_ri = st.selectbox(
                 "",
@@ -673,19 +673,19 @@ with tab1:
             with col8:
                 st.markdown('<h3 class="subsection-header">Ultrasonido</h3>', unsafe_allow_html=True)
                 
-                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
                 st.markdown('<label class="field-label">Folículos Ovario Derecho</label>', unsafe_allow_html=True)
                 follicle_r = st.number_input("", min_value=0, max_value=30, value=5, key="follicle_r", label_visibility="collapsed")
                 st.markdown('<p class="field-help">Normal: 2-10, SOP: >12</p>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
-                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
                 st.markdown('<label class="field-label">Grosor Endometrial (mm)</label>', unsafe_allow_html=True)
                 endometrium = st.number_input("", min_value=3.0, max_value=20.0, value=8.0, step=0.1, key="endometrium", label_visibility="collapsed")
                 st.markdown('<p class="field-help">Normal: 7-14 mm</p>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
-                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<div class="field-container important-field">', unsafe_allow_html=True)
                 st.markdown('<label class="field-label">Tamaño Promedio Folículos (mm)</label>', unsafe_allow_html=True)
                 avg_f_size_l = st.number_input("", min_value=2.0, max_value=25.0, value=10.0, step=0.1, key="avg_f_size_l", label_visibility="collapsed")
                 st.markdown('</div>', unsafe_allow_html=True)
@@ -693,7 +693,7 @@ with tab1:
             with col9:
                 st.markdown('<h3 class="subsection-header">Perfil Hormonal</h3>', unsafe_allow_html=True)
                 
-                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
                 st.markdown('<label class="field-label">AMH (ng/mL)</label>', unsafe_allow_html=True)
                 amh = st.number_input("", min_value=0.0, max_value=20.0, value=3.0, step=0.1, key="amh", label_visibility="collapsed")
                 st.markdown('<p class="field-help">Normal: <4.0, SOP: >4.7</p>', unsafe_allow_html=True)
@@ -705,7 +705,7 @@ with tab1:
                 st.markdown('<p class="field-help">Normal: 3-10 mIU/mL</p>', unsafe_allow_html=True)
                 st.markdown('</div>', unsafe_allow_html=True)
                 
-                st.markdown('<div class="field-container optional-field">', unsafe_allow_html=True)
+                st.markdown('<div class="field-container critical-field">', unsafe_allow_html=True)
                 st.markdown('<label class="field-label">Ratio FSH/LH</label>', unsafe_allow_html=True)
                 fsh_lh = st.number_input("", min_value=0.0, max_value=5.0, value=1.0, step=0.1, key="fsh_lh", label_visibility="collapsed")
                 st.markdown('<p class="field-help">Normal: >2, SOP: <1</p>', unsafe_allow_html=True)
